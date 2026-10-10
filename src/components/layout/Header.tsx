@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GiShoppingCart } from "react-icons/gi";
-import Userinfo from "../home/Userinfo";
-
+import Userinfo from "@/src/components/Userinfo";
 const Header = () => {
   const [date, setDate] = useState("");
 
