@@ -4,22 +4,34 @@ import { authClient } from "@/src/lib/auth-client";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { FiChevronDown, FiUser, FiLogOut } from "react-icons/fi";
 
 const Userinfo = () => {
+  const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [isOpen, setIsOpen] = useState(false);
 
   const user = session?.user;
-  console.log("User image:", user?.image);
   const firstLetter =
     user?.name?.trim().charAt(0).toUpperCase() ||
     user?.email?.trim().charAt(0).toUpperCase() ||
     "U";
 
   const handleSignOut = async () => {
-    await authClient.signOut();
     setIsOpen(false);
+
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।");
+      return;
+    }
+
+    toast.success("সফলভাবে সাইন আউট হয়েছে");
+    router.push("/");
+    router.refresh();
   };
 
   if (isPending) {
@@ -76,7 +88,6 @@ const Userinfo = () => {
               />
 
               <div className="absolute right-0 top-full z-50 mt-1.5 w-44 max-w-[calc(100vw-1rem)] overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/10 sm:mt-2 sm:w-52 sm:rounded-xl sm:p-1.5">
-                {/* User Information */}
                 <div className="px-2 py-1.5 sm:px-2.5 sm:py-2">
                   <p className="truncate text-xs font-semibold text-slate-800 sm:text-sm">
                     {user.name}
@@ -88,7 +99,6 @@ const Userinfo = () => {
 
                 <div className="my-0.5 border-t border-slate-100 sm:my-1" />
 
-                {/* Profile */}
                 <Link
                   href="/profile"
                   onClick={() => setIsOpen(false)}
@@ -99,7 +109,6 @@ const Userinfo = () => {
                   প্রোফাইল
                 </Link>
 
-                {/* Sign Out */}
                 <button
                   type="button"
                   onClick={handleSignOut}

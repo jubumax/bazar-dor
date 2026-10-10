@@ -1,11 +1,5 @@
-import React from 'react';
+import { ProductSectionsSkeleton } from "@/src/components/ui/Skeletons";
 
-const loading = () => {
-    return (
-        <div>
-            <h2>Loading...</h2>
-        </div>
-    );
-};
-
-export default loading;
+export default function Loading() {
+  return <ProductSectionsSkeleton />;
+}

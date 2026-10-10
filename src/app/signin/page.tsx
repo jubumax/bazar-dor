@@ -1,56 +1,70 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { DiGithub } from "react-icons/di";
 import { authClient } from "@/src/lib/auth-client";
 
 const SignIn = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (e: React.SubmitEvent<HTMLElement>) => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("redirected") === "1") {
+      toast.error("এই পেজ দেখতে আগে সাইন ইন করুন", { id: "auth-redirect" });
+    }
+  }, []);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target);
-    const user = Object.fromEntries(formData.entries()) as {
-      email: string;
-      password: string;
-    };
+    const formData = new FormData(e.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
 
-    const { data, error } = await authClient.signIn.email({
-      ...user,
-      callbackURL: "/",
-    });
-
-    if (error) {
-      if (error.code === "INVALID_EMAIL_OR_PASSWORD") {
-        toast.error("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে");
-      } else {
-        toast.error("লগইন করা যায়নি। আবার চেষ্টা করুন");
-      }
-
+    if (!email || !password) {
+      toast.error("ইমেইল ও পাসওয়ার্ড দিন");
       return;
     }
 
-    if (data) {
-      toast.success("সফলভাবে লগইন হয়েছে");
+    setIsLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.email({ email, password });
+
+      if (error) {
+        if (error.code === "INVALID_EMAIL_OR_PASSWORD") {
+          toast.error("ইমেইল অথবা পাসওয়ার্ড ভুল হয়েছে");
+        } else {
+          toast.error("লগইন করা যায়নি। আবার চেষ্টা করুন");
+        }
+
+        return;
+      }
+
+      toast.success("সফলভাবে লগইন হয়েছে");
       router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("লগইন করা যায়নি। আবার চেষ্টা করুন");
+    } finally {
+      setIsLoading(false);
     }
   };
-  const handleGoogleSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-    });
-  };
-  const handleGithubSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "github",
-    });
+
+  const handleSocialSignIn = async (provider: "google" | "github") => {
+    try {
+      await authClient.signIn.social({ provider, callbackURL: "/" });
+    } catch {
+      toast.error("সোশ্যাল লগইন করা যায়নি। আবার চেষ্টা করুন");
+    }
   };
 
   return (
@@ -67,28 +81,40 @@ const SignIn = () => {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="signin-email"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               ইমেইল
             </label>
 
             <input
+              id="signin-email"
               type="email"
               name="email"
+              required
+              autoComplete="email"
               placeholder="আপনার ইমেইল"
               className="input w-full border-gray-300 bg-white"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              পাসওয়ার্ড
+            <label
+              htmlFor="signin-password"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
+              পাসওয়ার্ড
             </label>
 
             <div className="relative">
               <input
+                id="signin-password"
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="আপনার পাসওয়ার্ড"
+                required
+                autoComplete="current-password"
+                placeholder="আপনার পাসওয়ার্ড"
                 className="input w-full border-gray-300 bg-white pr-10"
               />
 
@@ -97,7 +123,7 @@ const SignIn = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-green-700"
                 aria-label={
-                  showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
+                  showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"
                 }
               >
                 {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
@@ -107,33 +133,38 @@ const SignIn = () => {
 
           <button
             type="submit"
-            className="btn w-full border-0 bg-green-800 text-white hover:bg-green-700"
+            disabled={isLoading}
+            className="btn w-full border-0 bg-green-800 text-white hover:bg-green-700 disabled:opacity-60"
           >
-            সাইন ইন
+            {isLoading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
           </button>
         </form>
+
+        <div className="divider my-5 text-xs text-gray-400">অথবা</div>
+
         <button
           type="button"
-          onClick={handleGoogleSignIn}
-          className="btn mt-4 w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+          onClick={() => handleSocialSignIn("google")}
+          className="btn w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
         >
           <FcGoogle className="text-xl" />
-          Google দিয়ে সাইন আপ করুন
+          Google দিয়ে সাইন ইন করুন
         </button>
+
         <button
           type="button"
-          onClick={handleGithubSignIn}
-          className="btn mt-4 w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+          onClick={() => handleSocialSignIn("github")}
+          className="btn mt-3 w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
         >
           <DiGithub className="text-xl" />
-          Github দিয়ে সাইন আপ করুন
+          GitHub দিয়ে সাইন ইন করুন
         </button>
 
         <p className="mt-5 text-center text-sm text-gray-600">
           অ্যাকাউন্ট নেই?{" "}
           <Link
             href="/signup"
-            className="font-semibold text-cyan-700 hover:text-cyan-900"
+            className="font-semibold text-green-800 hover:text-green-900"
           >
             সাইন আপ করুন
           </Link>

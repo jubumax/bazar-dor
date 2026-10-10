@@ -1,21 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { FiChevronDown } from "react-icons/fi";
 import type { Product } from "@/src/types/product";
 import ProductCard from "@/src/components/product/ProductCard";
-import { toNumber } from "@/src/lib/utils";
+import { toBanglaNumber, toNumber } from "@/src/lib/utils";
 
 interface CategoryProductsProps {
   products: Product[];
 }
-
-const toBanglaNumber = (value: number) => {
-  const banglaDigits = "০১২৩৪৫৬৭৮৯";
-
-  return value
-    .toString()
-    .replace(/\d/g, (digit) => banglaDigits[Number(digit)]);
-};
 
 const CategoryProducts = ({ products }: CategoryProductsProps) => {
   const [sort, setSort] = useState("default");
@@ -36,7 +30,6 @@ const CategoryProducts = ({ products }: CategoryProductsProps) => {
 
   return (
     <>
-      {/* Count + Sort */}
       <div className="mb-7 flex items-center justify-between gap-3">
         <p className="text-xs text-slate-500 sm:text-sm">
           মোট {toBanglaNumber(products.length)}টি পণ্য দেখানো হচ্ছে
@@ -59,15 +52,14 @@ const CategoryProducts = ({ products }: CategoryProductsProps) => {
               <option value="high">দাম: বেশি থেকে কম</option>
             </select>
 
-            {/* Chevron */}
-            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">
-              ▼
-            </span>
+            <FiChevronDown
+              size={14}
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+            />
           </div>
         </div>
       </div>
 
-      {/* Product Cards */}
       {sortedProducts.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {sortedProducts.map((product) => (
@@ -77,8 +69,15 @@ const CategoryProducts = ({ products }: CategoryProductsProps) => {
       ) : (
         <div className="rounded-md border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
           <p className="text-sm font-bold text-slate-700">
-            এই category-তে কোনো পণ্য পাওয়া যায়নি।
+            এই ক্যাটাগরিতে কোনো পণ্য পাওয়া যায়নি।
           </p>
+
+          <Link
+            href="/"
+            className="btn mt-5 border-0 bg-[#05893E] text-white hover:bg-[#047A36]"
+          >
+            হোম পেজে ফিরে যান
+          </Link>
         </div>
       )}
     </>

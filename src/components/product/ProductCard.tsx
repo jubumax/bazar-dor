@@ -1,29 +1,20 @@
 import Link from "next/link";
 import type { Product } from "@/src/types/product";
-import { formatPrice, toBanglaNumber } from "@/src/lib/utils";
+import {
+  formatChange,
+  formatPrice,
+  getChangeBadgeClass,
+  getSignedChange,
+  getUnitLabel,
+} from "@/src/lib/utils";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const change = product.change.pct;
-
-  const changeClass =
-    change > 0
-      ? "text-red-600"
-      : change < 0
-        ? "text-green-600"
-        : "text-slate-500";
-
-  const unitNames: Record<string, string> = {
-    kg: "কেজি",
-    litre: "লিটার",
-    dozen: "ডজন",
-    piece: "পিস",
-  };
-
-  const unit = unitNames[product.unit] ?? product.unit;
+  const change = getSignedChange(product);
+  const unit = getUnitLabel(product.unit);
 
   return (
     <Link
@@ -31,7 +22,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
       className="group block rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-green-300 hover:shadow-md"
     >
       <div className="flex items-center justify-between gap-3">
-        {/* Product info */}
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-green-50 text-2xl">
             {product.image}
@@ -47,7 +37,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
       </div>
 
-      {/* Price + Change */}
       <div className="mt-3 flex items-end justify-between border-t border-slate-100 pt-2">
         <div>
           <p className="text-xs text-slate-500">আজকের দাম</p>
@@ -58,10 +47,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </p>
         </div>
 
-        {/* Change */}
-        <span className={`text-xs font-bold ${changeClass}`}>
-          {change > 0 ? "▲" : change < 0 ? "▼" : "—"}{" "}
-          {toBanglaNumber(Math.abs(change))}%
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs font-bold ${getChangeBadgeClass(change)}`}
+        >
+          {formatChange(change)}
         </span>
       </div>
     </Link>

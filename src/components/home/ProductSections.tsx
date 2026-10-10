@@ -1,30 +1,27 @@
 import type { Product } from "@/src/types/product";
 import ProductCard from "@/src/components/product/ProductCard";
-import { formatPrice, toBanglaNumber } from "@/src/lib/utils";
+import { getSignedChange, toBanglaNumber } from "@/src/lib/utils";
 
 interface ProductSectionsProps {
   products: Product[];
 }
 
 const ProductSections = ({ products }: ProductSectionsProps) => {
-  const sorted = [...products].sort(
-    (a, b) => Number(b.change.pct) - Number(a.change.pct),
-  );
-
-  const rising = sorted
-    .filter((product) => Number(product.change.pct) > 0)
+  const rising = [...products]
+    .filter((product) => getSignedChange(product) > 0)
+    .sort((a, b) => getSignedChange(b) - getSignedChange(a))
     .slice(0, 6);
 
   const falling = [...products]
-    .sort((a, b) => Number(a.change.pct) - Number(b.change.pct))
-    .filter((product) => Number(product.change.pct) < 0)
+    .filter((product) => getSignedChange(product) < 0)
+    .sort((a, b) => getSignedChange(a) - getSignedChange(b))
     .slice(0, 6);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
       <section>
         <div className="mb-6 flex items-center gap-2">
-          <span className="text-lg font-bold text-red-600">▲</span>
+          <span className="text-lg font-bold text-green-600">▲</span>
 
           <h2 className="text-xl font-extrabold text-slate-900 sm:text-2xl">
             আজ দাম বেড়েছে
@@ -40,7 +37,7 @@ const ProductSections = ({ products }: ProductSectionsProps) => {
 
       <section className="mt-16">
         <div className="mb-6 flex items-center gap-2">
-          <span className="text-lg font-bold text-green-600">▼</span>
+          <span className="text-lg font-bold text-red-600">▼</span>
 
           <h2 className="text-xl font-extrabold text-slate-900 sm:text-2xl">
             আজ দাম কমেছে

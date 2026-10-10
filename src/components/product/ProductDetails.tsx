@@ -1,25 +1,25 @@
 import Link from "next/link";
 import type { Product } from "@/src/types/product";
-import { formatPrice, toBanglaNumber, formatDecimalPrice } from "@/src/lib/utils";
+import {
+  formatChange,
+  formatDecimalPrice,
+  formatPrice,
+  getChangeClass,
+  getSignedChange,
+  getUnitLabel,
+  toBanglaNumber,
+} from "@/src/lib/utils";
 
 interface ProductDetailsProps {
   product: Product;
 }
 
 const ProductDetails = ({ product }: ProductDetailsProps) => {
-  const change = product.change.pct;
+  const change = getSignedChange(product);
   const priceChange = product.today - product.yesterday;
   const marketPrices = product.markets;
 
-  const unitNames: Record<string, string> = {
-    kg: "কেজি",
-    litre: "লিটার",
-    liter: "লিটার",
-    dozen: "ডজন",
-    piece: "পিস",
-  };
-
-  const unit = unitNames[product.unit] ?? product.unit;
+  const unit = getUnitLabel(product.unit);
 
   const minMarket =
     marketPrices.length > 0
@@ -46,6 +46,11 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
         ) / marketPrices.length
       : product.today;
 
+  const summaryLine =
+    marketPrices.length > 0
+      ? `${toBanglaNumber(marketPrices.length)}টি বাজারের তথ্য অনুযায়ী ${product.nameBn}-এর দাম প্রতি ${unit} ${formatPrice(minPrice)} থেকে ${formatPrice(maxPrice)} টাকার মধ্যে; গড় দাম প্রায় ${formatPrice(Math.round(averagePrice))} টাকা।`
+      : `আজ ${product.nameBn}-এর দাম প্রতি ${unit} ${formatPrice(product.today)} টাকা।`;
+
   return (
     <main className="min-h-screen bg-[#f4f8f3] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
@@ -64,7 +69,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           <span className="text-slate-700">{product.nameBn}</span>
         </div>
 
-        {/* Product Header */}
         <section className="mt-5 rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 sm:py-7">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             {/* Product Info */}
@@ -78,9 +82,23 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   {product.nameBn}
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  প্রতি {unit} · {product.categoryNameBn}
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                  {summaryLine}
                 </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/category/${product.category}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-800 transition hover:bg-green-100"
+                  >
+                    <span>{product.categoryIcon}</span>
+                    {product.categoryNameBn}
+                  </Link>
+
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    প্রতি {unit}
+                  </span>
+                </div>
 
                 <p className="mt-3 text-sm text-slate-600">
                   গতকালের তুলনায় আজ দাম{" "}
@@ -97,8 +115,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                       <span
                         className={
                           priceChange > 0
-                            ? "font-bold text-red-500"
-                            : "font-bold text-green-600"
+                            ? "font-bold text-green-600"
+                            : "font-bold text-red-600"
                         }
                       >
                         {formatPrice(Math.abs(priceChange))} টাকা
@@ -109,7 +127,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               </div>
             </div>
 
-            {/* Today's Price */}
             <div className="min-w-[150px] rounded-2xl bg-[#f4f8f3] px-6 py-4 text-center sm:text-right">
               <p className="text-sm font-medium text-slate-500">আজকের দাম</p>
 
@@ -119,25 +136,17 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
               <p className="mt-1 text-sm text-slate-500">টাকা / {unit}</p>
 
-              {change !== 0 && (
-                <p
-                  className={`mt-1 text-xs font-bold ${
-                    change > 0 ? "text-red-500" : "text-green-600"
-                  }`}
-                >
-                  {change > 0 ? "▲" : "▼"} {toBanglaNumber(Math.abs(change))}%
-                </p>
-              )}
+              <p className={`mt-1 text-xs font-bold ${getChangeClass(change)}`}>
+                {formatChange(change)}
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Price Summary */}
         <section className="mt-7 rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
           <h2 className="text-lg font-bold text-slate-900">দামের সারসংক্ষেপ</h2>
 
           <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {/* Minimum */}
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="text-sm text-slate-500">সর্বনিম্ন দাম</p>
 
@@ -156,7 +165,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               )}
             </div>
 
-            {/* Maximum */}
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="text-sm text-slate-500">সর্বাধিক দাম</p>
 
@@ -175,7 +183,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               )}
             </div>
 
-            {/* Average */}
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="text-sm text-slate-500">গড় দাম</p>
 
@@ -190,7 +197,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           </div>
         </section>
 
-        {/* Market Prices */}
         <section className="mt-7 rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm sm:p-7">
           <h2 className="text-lg font-bold text-slate-900">
             বাজারভিত্তিক আজকের দাম

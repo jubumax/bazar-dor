@@ -1,45 +1,67 @@
-import type { Category, Product } from "@/types/product";
+import type { Category, Product } from "@/src/types/product";
 
-const API_BASE_URL =
-  "https://api.api-store.workers.dev/api/bazardor";
+const API_BASE_URLS = [
+  "https://api.api-store.workers.dev/api/bazardor",
+  "https://api.abcz.workers.dev/api/bazardor",
+];
 
-async function fetchApi<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    next: {
-      revalidate: 300,
-    },
-  });
+async function fetchApi<T>(path: string): Promise<T> {
+  let lastError: unknown;
 
-  if (!response.ok) {
-    throw new Error("API request failed");
+  for (const baseUrl of API_BASE_URLS) {
+    try {
+      const response = await fetch(`${baseUrl}${path}`, {
+        next: { revalidate: 300 },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed (${response.status})`);
+      }
+
+      return (await response.json()) as T;
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return response.json();
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("API request failed");
 }
 
 export async function getCategories(): Promise<Category[]> {
-  return fetchApi<Category[]>(
-    `${API_BASE_URL}/categories`,
-  );
+  const categories = await fetchApi<Category[]>("/categories");
+
+  return Array.isArray(categories) ? categories : [];
 }
 
-export async function getProducts(
-  category?: string,
-): Promise<Product[]> {
-  const url = category
-    ? `${API_BASE_URL}/products?category=${category}`
-    : `${API_BASE_URL}/products`;
+export async function getProducts(category?: string): Promise<Product[]> {
+  const path = category
+    ? `/products?category=${encodeURIComponent(category)}`
+    : "/products";
 
-  return fetchApi<Product[]>(url);
+  try {
+    const products = await fetchApi<Product[]>(path);
+
+    return Array.isArray(products) ? products : [];
+  } catch (error) {
+    if (category) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
-export async function getProduct(
-  slug: string,
-): Promise<Product | null> {
+export async function getProduct(slug: string): Promise<Product | null> {
   try {
     const product = await fetchApi<Product>(
-      `${API_BASE_URL}/products/${slug}`,
+      `/products/${encodeURIComponent(slug)}`,
     );
+
+    if (!product || typeof product !== "object" || !("nameBn" in product)) {
+      return null;
+    }
 
     return product;
   } catch {

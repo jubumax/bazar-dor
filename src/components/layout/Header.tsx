@@ -30,9 +30,9 @@ const Header = () => {
           </div>
 
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+            <p className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
               বাজার দর
-            </h1>
+            </p>
             <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{date}</p>
           </div>
         </Link>

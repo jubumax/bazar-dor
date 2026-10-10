@@ -1,24 +1,26 @@
+"use client";
+
 import MarqueeText from "react-marquee-text";
 import "react-marquee-text/dist/styles.css";
 
 import type { Product } from "@/src/types/product";
-import { formatPrice } from "@/src/lib/utils";
+import {
+  formatChange,
+  formatPrice,
+  getChangeClass,
+  getSignedChange,
+  getUnitLabel,
+} from "@/src/lib/utils";
 
 interface PriceTickerProps {
   products: Product[];
 }
 
-const getUnitInBangla = (unit: string) => {
-  const units: Record<string, string> = {
-    kg: "কেজি",
-    liter: "লিটার",
-    dozen: "ডজন",
-  };
-
-  return units[unit] ?? unit;
-};
-
 const PriceTicker = ({ products }: PriceTickerProps) => {
+  if (products.length === 0) {
+    return null;
+  }
+
   return (
     <div className="overflow-hidden border-y border-slate-200 bg-[#FAFCFA] text-slate-700">
       <MarqueeText
@@ -27,32 +29,28 @@ const PriceTicker = ({ products }: PriceTickerProps) => {
         pauseOnHover
         className="flex items-center"
       >
-        {products
-          .filter((product) => product.change.pct !== 0)
-          .map((product) => {
-            const change = product.change.pct;
-            const isUp = product.change.dir === "up";
+        {products.map((product) => {
+          const change = getSignedChange(product);
 
-            return (
-              <div
-                key={product.id}
-                className="flex shrink-0 items-center gap-2 px-4 py-2 text-sm"
-              >
-                <span>{product.image}</span>
+          return (
+            <div
+              key={product.id}
+              className="flex shrink-0 items-center gap-2 px-4 py-2 text-sm"
+            >
+              <span>{product.image}</span>
 
-                <span className="font-bold">{product.nameBn}</span>
+              <span className="font-bold">{product.nameBn}</span>
 
-                <span>
-                  {formatPrice(product.today)} টাকা/
-                  {getUnitInBangla(product.unit)}
-                </span>
+              <span>
+                {formatPrice(product.today)} টাকা/{getUnitLabel(product.unit)}
+              </span>
 
-                <span className={isUp ? "text-red-500" : "text-green-600"}>
-                  {isUp ? "▲" : "▼"} {Math.abs(change)}%
-                </span>
-              </div>
-            );
-          })}
+              <span className={`font-semibold ${getChangeClass(change)}`}>
+                {formatChange(change)}
+              </span>
+            </div>
+          );
+        })}
       </MarqueeText>
     </div>
   );
