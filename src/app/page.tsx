@@ -1,11 +1,14 @@
-import React from 'react';
+import Hero from "@/src/components/home/Hero";
+import ProductSections from "@/src/components/home/ProductSections";
+import { getProducts } from "@/src/lib/api";
 
-const page = () => {
-    return (
-        <div>
-            <h1>Welcome to the App</h1>
-        </div>
-    );
-};
+export default async function HomePage() {
+  const products = await getProducts();
 
-export default page;
+  return (
+    <main>
+      <Hero />
+      <ProductSections products={products} />
+    </main>
+  );
+}
