@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/src/components/layout/Header";
+import CategoryNav from "@/src/components/layout/CategoryNav";
+import PriceTicker from "@/src/components/layout/PriceTicker";
 import { getCategories, getProducts } from "@/src/lib/api";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -36,9 +38,11 @@ export default async function RootLayout({
         <div className="sticky top-0 z-50  bg-[#FAFCFA]">
           <Header />
           <Suspense fallback={null}>
+            <CategoryNav categories={categories} />
           </Suspense>
         </div>
 
+        <PriceTicker products={products} />
         {children}
 
         <ToastContainer
