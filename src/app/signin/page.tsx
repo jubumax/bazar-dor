@@ -6,7 +6,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { DiGithub } from "react-icons/di";
+import { DiGithubBadge } from "react-icons/di";
 import { authClient } from "@/src/lib/auth-client";
 
 const SignIn = () => {
@@ -67,16 +67,15 @@ const SignIn = () => {
     }
   };
 
-  return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4 py-10">
+    return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h1 className="text-center text-3xl font-bold text-gray-900">
           সাইন ইন
         </h1>
 
         <p className="mt-2 text-center text-sm text-gray-500">
-          আপনার <span className="font-bold">বাজার দর</span> অ্যাকাউন্টে প্রবেশ
-          করুন।
+          বিস্তারিত দাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্টে ঢুকুন।
         </p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -94,7 +93,7 @@ const SignIn = () => {
               name="email"
               required
               autoComplete="email"
-              placeholder="আপনার ইমেইল"
+              placeholder="you@example.com"
               className="input w-full border-gray-300 bg-white"
             />
           </div>
@@ -148,7 +147,7 @@ const SignIn = () => {
           className="btn w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
         >
           <FcGoogle className="text-xl" />
-          Google দিয়ে সাইন ইন করুন
+          Google দিয়ে চালিয়ে যান
         </button>
 
         <button
@@ -156,8 +155,8 @@ const SignIn = () => {
           onClick={() => handleSocialSignIn("github")}
           className="btn mt-3 w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
         >
-          <DiGithub className="text-xl" />
-          GitHub দিয়ে সাইন ইন করুন
+          <DiGithubBadge className="text-xl" />
+          GitHub দিয়ে চালিয়ে যান
         </button>
 
         <p className="mt-5 text-center text-sm text-gray-600">
@@ -170,6 +169,13 @@ const SignIn = () => {
           </Link>
         </p>
       </div>
+
+      <Link
+        href="/"
+        className="mt-4 text-sm text-[#1D271F]/60 transition hover:text-[#1D271F]"
+      >
+        ← হোম পেজে ফিরে যান
+      </Link>
     </div>
   );
 };

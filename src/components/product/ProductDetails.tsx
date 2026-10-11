@@ -277,14 +277,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             </p>
           )}
         </section>
-        <div className="mt-7">
-          <Link
-            href={`/category/${product.category}`}
-            className="inline-flex items-center rounded-xl bg-[#05893E] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[#047A36] hover:shadow-md active:scale-95 sm:rounded-2xl sm:px-5 sm:py-2.5 sm:text-sm"
-          >
-            ← সব {product.categoryNameBn}
-          </Link>
-        </div>
+
       </div>
     </main>
   );

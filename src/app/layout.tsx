@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="bn"
+      data-theme="light"
       className={`${NotoSerifBengali.className} h-full antialiased`}
     >
       <body>
