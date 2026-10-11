@@ -22,6 +22,11 @@ export const auth = betterAuth({
     },
   },
   database: mongodbAdapter(db, { client }),
-  trustedOrigins: [process.env.BETTER_AUTH_URL as string, "http://localhost:3000"],
+  trustedOrigins: [
+  process.env.BETTER_AUTH_URL as string,
+  "http://localhost:3000",
+  "https://bazar-dor-uit6.vercel.app",
+  "https://*.vercel.app",
+],
   plugins: [nextCookies()],
 });
