@@ -24,15 +24,15 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const minMarket =
     marketPrices.length > 0
       ? marketPrices.reduce((lowest, market) =>
-          market.min < lowest.min ? market : lowest,
-        )
+        market.min < lowest.min ? market : lowest,
+      )
       : null;
 
   const maxMarket =
     marketPrices.length > 0
       ? marketPrices.reduce((highest, market) =>
-          market.max > highest.max ? market : highest,
-        )
+        market.max > highest.max ? market : highest,
+      )
       : null;
 
   const minPrice = minMarket?.min ?? product.today;
@@ -41,9 +41,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const averagePrice =
     marketPrices.length > 0
       ? marketPrices.reduce(
-          (total, market) => total + (market.min + market.max) / 2,
-          0,
-        ) / marketPrices.length
+        (total, market) => total + (market.min + market.max) / 2,
+        0,
+      ) / marketPrices.length
       : product.today;
 
   const summaryLine =
@@ -62,7 +62,12 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           <span>›</span>
 
-          <span>{product.categoryNameBn}</span>
+          <span><Link
+            href={`/category/${product.category}`}
+            className="hover:text-green-700"
+          >
+            {product.categoryNameBn}
+          </Link></span>
 
           <span>›</span>
 
@@ -236,9 +241,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                     return (
                       <tr
                         key={market.market}
-                        className={`border-b border-slate-200 last:border-b-0 ${
-                          index % 2 === 1 ? "bg-[#f3f7f2]" : "bg-white"
-                        }`}
+                        className={`border-b border-slate-200 last:border-b-0 ${index % 2 === 1 ? "bg-[#f3f7f2]" : "bg-white"
+                          }`}
                       >
                         <td className="break-words px-1.5 py-3 font-semibold text-slate-700 sm:px-4 sm:py-4">
                           {market.market}
